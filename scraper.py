@@ -1,4 +1,6 @@
 from bs4 import BeautifulSoup
+from setuptools.extern import names
+
 from web import Web
 
 
@@ -70,13 +72,14 @@ class Scraper:
     def get_job_titles(self, jobs_list: list):
         for artitle in jobs_list:
             job_title = artitle.find(name='h2', class_='job-tile-title')
-            self.job_title.append(job_title.text)
+            self.job_title.append(job_title.text.replace(';', ''))
 
 
     def get_job_description(self, jobs_list: list):
         for article in jobs_list:
-            job_description = article.select_one('.is-clamped p')
-            self.job_description.append(job_description.text)
+            job_description = article.find_all(name='div')
+            description = job_description[6].find(name='p')
+            self.job_description.append(description.text[:200].replace('\n', '').replace(';', ''))
 
 
     def get_job_payment(self, job_list: list):
@@ -85,7 +88,7 @@ class Scraper:
             job_payment = job_info.find(name='li', attrs={"data-test": "is-fixed-price"})
             if not job_payment:
                 job_payment = job_info.find(name='li', attrs={"data-test": "job-type-label"})
-            self.job_payment.append(job_payment)
+            self.job_payment.append(job_payment.text)
 
 
     def get_job_link(self, job_list: list):
