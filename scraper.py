@@ -1,5 +1,6 @@
-from attr import attributes
 from bs4 import BeautifulSoup
+from web import Web
+
 
 
 class Scraper:
@@ -14,33 +15,57 @@ class Scraper:
         self.job_payment = []
         self.job_link = []
 
+        self.number_of_pages = 0
+
+        self.web = Web(topic=topic)
+
+
     def get_info(self):
         data = self.soup
         jobs_section = data.find(name='section', class_='card-list-container')
+
         if jobs_section:
             # find number of pages
             number_of_pages = int(data.find_all(name='div', class_='sr-only')[-2].text[24::].lstrip())
 
             # get job info from jobs section
             jobs_articles = jobs_section.find_all(name='article')
+            if number_of_pages > 1:
+                for page in range(1, number_of_pages + 1):
+                    print(f'getting your job info please wait... {page} of {number_of_pages}')
+                    self.web.url += f'&page={page}'
+                    self.soup = BeautifulSoup(self.web.get_webpage(), "html.parser")
+                    data = self.soup
+                    jobs_section = data.find(name='section', class_='card-list-container')
 
-            # get job titles
-            self.get_job_titles(jobs_list=jobs_articles)
+                    # get job info from jobs section
+                    jobs_articles = jobs_section.find_all(name='article')
 
-            # get job description
-            self.get_job_description(jobs_list=jobs_articles)
+                    self.get_data(jobs_articles=jobs_articles)
 
-            # get job python
-            self.get_job_payment(job_list=jobs_articles)
+                    self.web.url = self.web.url.replace(f'&page={page}', '')
 
-            #get job link
-            self.get_job_link(job_list=jobs_articles)
 
+            else:
+                self.get_data(jobs_articles=jobs_articles)
 
         else:
             print(f"Sorry not jobs found for: '{self.topic}'")
             exit(0)
 
+
+    def get_data(self, jobs_articles):
+        # get job titles
+        self.get_job_titles(jobs_list=jobs_articles)
+
+        # get job description
+        self.get_job_description(jobs_list=jobs_articles)
+
+        # get job python
+        self.get_job_payment(job_list=jobs_articles)
+
+        #get job link
+        self.get_job_link(job_list=jobs_articles)
 
     def get_job_titles(self, jobs_list: list):
         for artitle in jobs_list:

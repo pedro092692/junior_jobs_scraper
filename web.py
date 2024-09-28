@@ -3,7 +3,7 @@ import requests
 
 class Web:
 
-    def __init__(self):
+    def __init__(self, topic):
         self.scraper = cloudscraper.create_scraper(
             browser={
                 'browser': 'firefox',
@@ -12,10 +12,11 @@ class Web:
             },
         )
 
-    def get_webpage(self, topic: str) -> str:
-        url = f'https://www.upwork.com/nx/search/jobs/?contractor_tier=1&q={topic}&sort=recency'
+        self.url = f'https://www.upwork.com/nx/search/jobs/?contractor_tier=1&q={topic}&sort=recency'
+
+    def get_webpage(self) -> str:
         try:
-            response = self.scraper.get(url)
+            response = self.scraper.get(self.url)
             response.raise_for_status()
             web_content = response.text
         except requests.exceptions.ConnectionError as e:

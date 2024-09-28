@@ -3,9 +3,9 @@ from scraper import Scraper
 
 topic = 'python'
 
-web = Web()
-web_content = web.get_webpage(topic=topic)
+web = Web(topic='python')
+web_content = web.get_webpage()
 
 
 scraper = Scraper(web=web_content, topic=topic)
-print(scraper.get_info())
+scraper.get_info()
